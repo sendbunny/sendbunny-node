@@ -78,7 +78,9 @@ describe("settings", () => {
     configFailure(() => new SendBunny({ url: URL_, apiKey: KEY, timeoutMs: 0 }), /timeoutMs/)
     configFailure(() => new SendBunny({ url: URL_, apiKey: KEY, timeoutMs: Number.NaN }), /timeoutMs/)
     configFailure(() => new SendBunny({ url: URL_, apiKey: KEY, domain: "not a domain" }), /domain/)
+    configFailure(() => new SendBunny({ url: URL_, apiKey: KEY, domain: 5 }), /domain/)
     new SendBunny({ url: URL_, apiKey: KEY, domain: "Acme.COM" })
+    new SendBunny({ url: URL_, apiKey: KEY, domain: null })
   })
 
   it("refuses to start in a web page", () => {

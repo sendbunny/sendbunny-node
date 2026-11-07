@@ -1,3 +1,4 @@
+import { resolveDomain } from "./config.js"
 import { configError } from "./errors.js"
 import type { RequestOptions, Transport } from "./http.js"
 
@@ -45,14 +46,14 @@ export class Events {
     if (!params || typeof params !== "object") throw configError("events.track needs the event's details.")
     if (typeof params.email !== "string" || !params.email.trim()) throw configError("events.track needs `email`.")
     if (typeof params.event !== "string" || !params.event.trim()) throw configError("events.track needs `event`, like \"trial_started\".")
-    const domain = params.domain ?? this.#domain
+    const domain = resolveDomain(params.domain) ?? this.#domain
     if (!domain) {
       throw configError("events.track needs a domain: pass `domain` (like acme.com), or set it once with new SendBunny({ domain }).")
     }
     return this.#http.request<TrackEventResult>(
       "POST",
       "/events",
-      { rootDomain: domain.trim().toLowerCase(), email: params.email, name: params.event, data: params.data },
+      { rootDomain: domain, email: params.email, name: params.event, data: params.data },
       options,
     )
   }

@@ -15,7 +15,7 @@ await sendbunny.emails.send({
 })
 ```
 
-Works with Node.js 20.3+, Bun, Deno, Cloudflare Workers and Vercel. Fully typed for TypeScript.
+For Node.js 20.3+, built on web standards for edge runtimes too. Fully typed for TypeScript.
 
 ## Install
 
@@ -63,17 +63,21 @@ await sendbunny.emails.send({
 })
 ```
 
+SendBunny does not support `bcc` or `attachments` yet. If you pass them, SendBunny refuses the email with a clear error rather than sending it without them.
+
 ## Add a contact
 
+Contacts and events belong to one of your sending domains. Set it once on the client:
+
 ```js
-const sendbunny = new SendBunny({ domain: "acme.com" }) // your sending domain
+const sendbunny = new SendBunny({ domain: "acme.com" })
 
 await sendbunny.contacts.add({
   email: "ana@example.com",
   name: "Ana",
   status: "subscribed",                      // or "never_subscribed" for a customer who never asked for marketing email
   agreed: { how: "form", note: "Send me product news" },
-  listId: "lst_...",
+  listId: "8f14e45f-ceea-467f-a8f2-8b5c7d1e2a90", // a list's id
   fields: { plan: "Pro" },
 })
 ```
@@ -85,6 +89,7 @@ Adding someone who is already a contact updates them. Someone who unsubscribed s
 Tell SendBunny something happened in your app. Automations that start on that event begin for that person.
 
 ```js
+// Uses the client's domain, set above. Or pass `domain` on the call.
 await sendbunny.events.track({
   email: "ana@example.com",
   event: "trial_started",
@@ -161,7 +166,7 @@ try {
 | `code` | Meaning |
 |---|---|
 | `config` | A setting is missing or wrong. The message says which. |
-| `api` | SendBunny said no. `status` and `message` say why. |
+| `api` | SendBunny answered with an error. `status` and `message` say why. |
 | `network` | SendBunny could not be reached. |
 | `timeout` | No answer in time (30 seconds by default, `timeoutMs` to change). |
 | `aborted` | Your own `AbortSignal` cancelled the call. |
@@ -169,7 +174,10 @@ try {
 | `webhook_signature` | A webhook was not signed by your install, or is too old. |
 | `webhook_payload` | A signed webhook did not contain SendBunny events. |
 
-**Nothing is retried automatically.** A retry after a dropped connection could send the same email twice. After a `timeout` or `network` error, check your sent-email log before sending again.
+**Nothing is retried automatically**, because a repeated send could deliver the same email twice. When a call fails, `err.uncertain` tells you whether it may still have been carried out:
+
+- `false`: it was not. Fix the cause and try again.
+- `true`: it may have been, after no answer in time, a dropped connection, or a server error. Check the email log in SendBunny before sending again.
 
 ## Security
 
@@ -183,12 +191,13 @@ Found a security problem? Please report it privately, as described in [SECURITY.
 
 ## Runtimes
 
+Tested on Node.js 20, 22 and 24, with `import` or `require`. The SDK uses only web standards (`fetch` and Web Crypto), so it is made to run on Bun, Deno, Cloudflare Workers and Vercel Edge too; those are not yet in our automated tests.
+
 | Runtime | Notes |
 |---|---|
-| Node.js 20.3+ | `import` or `require`. |
-| Bun, Deno | Deno needs `--allow-env` to read the settings from the environment, or pass them as options. |
+| Node.js 20.3+ | Reads `SENDBUNNY_URL` and `SENDBUNNY_API_KEY` from the environment. |
+| Deno | Needs `--allow-env` to read the environment, or pass the settings as options. |
 | Cloudflare Workers | There is no `process.env`: pass `url`, `apiKey` and `webhookSecret` from your Worker's `env`. |
-| Vercel, Netlify | Node.js and Edge functions both work. |
 
 ## About SendBunny
 

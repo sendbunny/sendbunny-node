@@ -1,3 +1,4 @@
+import { resolveDomain } from "./config.js"
 import { configError } from "./errors.js"
 import type { RequestOptions, Transport } from "./http.js"
 
@@ -61,17 +62,18 @@ export class Contacts {
   async add(params: AddContactParams, options?: RequestOptions): Promise<Contact> {
     if (!params || typeof params !== "object") throw configError("contacts.add needs the contact's details.")
     if (typeof params.email !== "string" || !params.email.trim()) throw configError("contacts.add needs `email`.")
-    const domain = params.domain ?? this.#domain
+    const domain = resolveDomain(params.domain) ?? this.#domain
     if (!domain) {
       throw configError("contacts.add needs a domain: pass `domain` (like acme.com), or set it once with new SendBunny({ domain }).")
     }
+    if (params.lists !== undefined && !Array.isArray(params.lists)) throw configError("contacts.add: `lists` must be a list of list ids.")
     const answer = await this.#http.request<{ contact: Contact }>(
       "POST",
       "/contacts",
       {
         email: params.email,
         name: params.name,
-        rootDomain: domain.trim().toLowerCase(),
+        rootDomain: domain,
         status: params.status,
         listId: params.listId,
         lists: params.lists === undefined ? undefined : [...params.lists],

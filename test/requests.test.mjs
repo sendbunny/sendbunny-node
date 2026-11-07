@@ -69,8 +69,18 @@ describe("emails.send", () => {
     })
   })
 
+  it("passes unknown fields on, so SendBunny can refuse the ones it does not support", async () => {
+    const { sb, calls } = client(() => json(400, { error: "'bcc' is not supported yet" }))
+    const payload = { from: "a@acme.test", to: "b@example.com", subject: "x", text: "x", bcc: ["hidden@example.com"], attachments: [{ filename: "a.pdf" }] }
+    await failure(sb.emails.send(payload), (e) => assert.equal(e.status, 400))
+    assert.deepEqual(calls[0].body.bcc, ["hidden@example.com"])
+    assert.deepEqual(calls[0].body.attachments, [{ filename: "a.pdf" }])
+  })
+
   it("checks the basics before sending anything", async () => {
     const { sb, calls } = client()
+    await failure(sb.emails.send({ from: "a@acme.test", to: 42, subject: "x", text: "x" }), (e) => assert.equal(e.code, "config"))
+    await failure(sb.emails.send({ from: "a@acme.test", to: "b@example.com", cc: 42, subject: "x", text: "x" }), (e) => assert.equal(e.code, "config"))
     await failure(sb.emails.send({ to: "a@example.com", subject: "x", text: "x" }), (e) => assert.equal(e.code, "config"))
     await failure(sb.emails.send({ from: "a@acme.test", subject: "x", text: "x" }), (e) => assert.equal(e.code, "config"))
     await failure(sb.emails.send(undefined), (e) => assert.equal(e.code, "config"))
@@ -87,6 +97,16 @@ describe("errors", () => {
       assert.equal(e.message, "'to' contains an invalid address: ana@")
       assert.equal(e.requestId, "req-1")
       assert.deepEqual(e.body, { error: "'to' contains an invalid address: ana@" })
+      assert.equal(e.uncertain, false)
+    })
+  })
+
+  it("explains a refused key when the answer has no message", async () => {
+    const { sb } = client(() => json(403, { message: "Forbidden" }))
+    await failure(sb.emails.send({ from: "a@acme.test", to: "b@example.com", subject: "x", text: "x" }), (e) => {
+      assert.equal(e.code, "api")
+      assert.match(e.message, /API key/)
+      assert.equal(e.uncertain, false)
     })
   })
 
@@ -104,11 +124,28 @@ describe("errors", () => {
     assert.equal(calls.length, 1)
   })
 
-  it("names a non-JSON answer as a wrong address", async () => {
+  it("marks a server error on a send as uncertain: the email may have gone out", async () => {
+    const answers = [
+      () => json(504, { message: "Endpoint request timed out" }),
+      () => json(500, { error: "Something broke" }),
+      () => new Response("<html>502 Bad Gateway</html>", { status: 502 }),
+    ]
+    for (const answer of answers) {
+      const { sb } = client(answer)
+      await failure(sb.emails.send({ from: "a@acme.test", to: "b@example.com", subject: "x", text: "x" }), (e) => {
+        assert.equal(e.code, "api")
+        assert.equal(e.uncertain, true)
+        assert.ok(e.status >= 500)
+      })
+    }
+  })
+
+  it("points a non-JSON 404 at the address, and a non-JSON success is not SendBunny", async () => {
     const { sb } = client(() => new Response("<html>Not found</html>", { status: 404 }))
     await failure(sb.emails.send({ from: "a@acme.test", to: "b@example.com", subject: "x", text: "x" }), (e) => {
-      assert.equal(e.code, "bad_response")
+      assert.equal(e.code, "api")
       assert.equal(e.status, 404)
+      assert.match(e.message, /SENDBUNNY_URL/)
     })
     const ok = client(() => new Response("hello", { status: 200 }))
     await failure(ok.sb.emails.send({ from: "a@acme.test", to: "b@example.com", subject: "x", text: "x" }), (e) => assert.equal(e.code, "bad_response"))
@@ -136,6 +173,7 @@ describe("errors", () => {
     })
     await failure(sb.emails.send({ from: "a@acme.test", to: "b@example.com", subject: "x", text: "x" }), (e) => {
       assert.equal(e.code, "network")
+      assert.equal(e.uncertain, true)
       assert.match(e.message, /mail\.acme\.test/)
       assert.ok(e.cause instanceof TypeError)
     })
@@ -147,6 +185,7 @@ describe("errors", () => {
     const sb = new SendBunny({ url: URL_, apiKey: KEY, fetch: hang, timeoutMs: 30 })
     await failure(sb.emails.send({ from: "a@acme.test", to: "b@example.com", subject: "x", text: "x" }), (e) => {
       assert.equal(e.code, "timeout")
+      assert.equal(e.uncertain, true)
       assert.match(e.message, /may still have gone through/)
     })
     await failure(sb.emails.send({ from: "a@acme.test", to: "b@example.com", subject: "x", text: "x" }, { timeoutMs: 10 }), (e) =>
@@ -171,6 +210,8 @@ describe("contacts.add", () => {
       assert.equal(e.code, "config")
       assert.match(e.message, /domain/)
     })
+    await failure(sb.contacts.add({ email: "ana@example.com", domain: 123 }), (e) => assert.equal(e.code, "config"))
+    await failure(sb.contacts.add({ email: "ana@example.com", domain: "acme.test", lists: "lst_1" }), (e) => assert.equal(e.code, "config"))
     assert.equal(calls.length, 0)
   })
 
@@ -211,6 +252,7 @@ describe("events.track", () => {
     const { sb, calls } = client()
     await failure(sb.events.track({ event: "x", domain: "acme.test" }), (e) => assert.equal(e.code, "config"))
     await failure(sb.events.track({ email: "a@example.com", domain: "acme.test" }), (e) => assert.equal(e.code, "config"))
+    await failure(sb.events.track({ email: "a@example.com", event: "x", domain: 123 }), (e) => assert.equal(e.code, "config"))
     assert.equal(calls.length, 0)
   })
 })

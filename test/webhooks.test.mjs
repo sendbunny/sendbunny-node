@@ -169,5 +169,9 @@ describe("verifyWebhook refuses forged or replayed requests", () => {
     await refused(verifyWebhook("not json", signedHeaders(secret, "not json"), { secret }), "webhook_payload")
     const notEvents = JSON.stringify({ hello: "world" })
     await refused(verifyWebhook(notEvents, signedHeaders(secret, notEvents), { secret }), "webhook_payload")
+    for (const broken of [{ ...EVENT, domain: 7 }, { ...EVENT, data: "x" }, { ...EVENT, timestamp: undefined }]) {
+      const body = JSON.stringify(broken)
+      await refused(verifyWebhook(body, signedHeaders(secret, body), { secret }), "webhook_payload")
+    }
   })
 })

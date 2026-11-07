@@ -37,7 +37,7 @@ How a version gets from this repository to npm. Nobody holds an npm token. GitHu
 1. Create the organisation `sendbunny` on the free plan: [github.com/account/organizations/new](https://github.com/account/organizations/new). In its settings, require two-step login for everyone.
 2. Repository `sendbunny/sendbunny-node`, public, with:
    - a ruleset on `main`: pull request required, checks "Node 20", "Node 22", "Node 24" and CodeQL must pass, no force pushes, no deletion;
-   - a ruleset on tags `v*`: no updates or deletion once pushed;
+   - a ruleset on tags `v*`: only organisation owners may create them, and no updates or deletion once pushed (the release workflow also refuses a tag whose commit is not on `main`);
    - an environment named `npm` that only accepts tags matching `v*`;
    - Actions limited to actions made by GitHub, pinned to full commit SHAs, with read-only default permissions;
    - private vulnerability reporting, secret scanning with push protection, and Dependabot alerts turned on.

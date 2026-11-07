@@ -20,8 +20,14 @@ describe("entry points", () => {
     assert.equal(typeof mod.SendBunnyError, "function")
   })
 
-  it("errors from require and import are the same kind of thing", async () => {
-    const { SendBunny, SendBunnyError } = require("sendbunny")
-    assert.throws(() => new SendBunny({ url: "", apiKey: "" }), (e) => e instanceof SendBunnyError && e.code === "config")
+  it("instanceof SendBunnyError works across the require and import copies", async () => {
+    const cjs = require("sendbunny")
+    const esm = await import("sendbunny")
+    assert.notEqual(cjs.SendBunnyError, esm.SendBunnyError, "two copies are loaded")
+    for (const [from, to] of [[cjs, esm], [esm, cjs]]) {
+      assert.throws(() => new from.SendBunny({ url: "", apiKey: "" }), (e) => e instanceof to.SendBunnyError && e instanceof Error && e.code === "config")
+    }
+    assert.ok(!(new Error("x") instanceof esm.SendBunnyError))
+    assert.ok(!({ code: "config" } instanceof esm.SendBunnyError))
   })
 })

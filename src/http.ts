@@ -31,6 +31,19 @@ function retryAfterSeconds(header: string | null): number | null {
   return Math.max(0, Math.ceil((date - Date.now()) / 1000))
 }
 
+/** Words for an error answer that carries no message of its own. */
+function statusMessage(status: number, uncertain: boolean): string {
+  if (status >= 500) {
+    return `SendBunny had a temporary problem (status ${status}).${uncertain ? " The request may still have gone through, so check in SendBunny before trying again." : ""}`
+  }
+  if (status === 401 || status === 403) {
+    return `SendBunny refused the request (status ${status}). The API key may be wrong, revoked or not allowed to do this, or the install's firewall blocked the request.`
+  }
+  if (status === 404) return "Not found (status 404). Check that SENDBUNNY_URL is your SendBunny install's address."
+  if (status === 429) return "Too many requests (status 429). Wait and try again."
+  return `SendBunny answered with status ${status}.`
+}
+
 function requestIdOf(headers: Headers): string | null {
   return headers.get("x-amzn-requestid") ?? headers.get("apigw-requestid") ?? headers.get("x-amz-cf-id")
 }
@@ -38,7 +51,8 @@ function requestIdOf(headers: Headers): string | null {
 /**
  * Sends requests with the API key. Nothing here retries: SendBunny cannot yet
  * tell a repeated send from a new one, so an automatic retry could deliver
- * an email twice. Failures go back to the caller with a clear code instead.
+ * an email twice. Failures go back to the caller with a clear code, and
+ * `uncertain` set when the request may still have been carried out.
  */
 export class Transport {
   readonly #baseUrl: string
@@ -86,18 +100,18 @@ export class Transport {
       })
       text = await response.text()
     } catch (cause) {
+      // A write that got no answer may still have been carried out.
+      const uncertain = method !== "GET"
+      const maybe = uncertain ? " The request may still have gone through, so check in SendBunny before trying again." : ""
       if (options.signal?.aborted) {
-        throw new SendBunnyError("The call was cancelled.", { code: "aborted", cause })
+        throw new SendBunnyError(`The call was cancelled.${maybe}`, { code: "aborted", uncertain, cause })
       }
       if (timeout.aborted) {
-        throw new SendBunnyError(
-          `No answer from SendBunny within ${timeoutMs / 1000} seconds. The request may still have gone through, so check before trying again.`,
-          { code: "timeout", cause },
-        )
+        throw new SendBunnyError(`No answer from SendBunny within ${timeoutMs / 1000} seconds.${maybe}`, { code: "timeout", uncertain, cause })
       }
       throw new SendBunnyError(
-        `Could not reach SendBunny at ${new URL(this.#baseUrl).host}. Check SENDBUNNY_URL and your network. The request may still have gone through if the connection dropped mid-way.`,
-        { code: "network", cause },
+        `Could not reach SendBunny at ${new URL(this.#baseUrl).host}. Check SENDBUNNY_URL and your network.${maybe}`,
+        { code: "network", uncertain, cause },
       )
     }
 
@@ -127,8 +141,12 @@ export class Transport {
         isJson && data && typeof data === "object" && typeof (data as { error?: unknown }).error === "string"
           ? (data as { error: string }).error
           : null
-      throw new SendBunnyError(serverMessage ?? `SendBunny answered with status ${status}.`, {
-        code: isJson ? "api" : "bad_response",
+      // A server error does not mean nothing happened: the gateway gives up
+      // after 29 seconds while the work can carry on behind it.
+      const uncertain = status >= 500 && method !== "GET"
+      throw new SendBunnyError(serverMessage ?? statusMessage(status, uncertain), {
+        code: "api",
+        uncertain,
         status,
         retryAfter: retryAfterSeconds(response.headers.get("retry-after")),
         requestId,

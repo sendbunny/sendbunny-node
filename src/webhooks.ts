@@ -152,7 +152,14 @@ function parseEvents(bytes: Uint8Array): WebhookEvent[] {
   // One event per request, or { events: [...] } for a batched webhook.
   const events: unknown[] = isObject(data) && Array.isArray(data.events) ? data.events : [data]
   for (const event of events) {
-    if (!isObject(event) || typeof event.id !== "string" || typeof event.type !== "string") {
+    if (
+      !isObject(event) ||
+      typeof event.id !== "string" ||
+      typeof event.type !== "string" ||
+      typeof event.timestamp !== "string" ||
+      typeof event.domain !== "string" ||
+      !isObject(event.data)
+    ) {
       throw payloadError("The webhook's body is not SendBunny events.")
     }
   }

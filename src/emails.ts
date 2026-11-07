@@ -58,8 +58,10 @@ export interface SendEmailResult {
   messageId: string
 }
 
-function list(value: Recipients): string[] {
-  return typeof value === "string" ? [value] : [...value]
+function list(value: unknown, field: string): string[] {
+  if (typeof value === "string") return [value]
+  if (Array.isArray(value)) return [...value]
+  throw configError(`emails.send: \`${field}\` must be an address or a list of addresses.`)
 }
 
 /** Transactional email. */
@@ -76,32 +78,26 @@ export class Emails {
    * and/or `text`) or from a template (`templateAlias` or `templateId`, with
    * `data`).
    *
-   * Never retried automatically. If it fails with code `timeout` or
-   * `network`, the email may or may not have gone out: check the sent-email
-   * log before sending it again.
+   * Fields this SDK does not know are passed on unchanged, so SendBunny can
+   * refuse the ones it does not support yet (like `bcc` and `attachments`)
+   * instead of the email going out without them.
+   *
+   * Never retried automatically. If the error's `uncertain` is true, the
+   * email may still have gone out: check in SendBunny before sending again.
    */
   async send(params: SendEmailParams, options?: RequestOptions): Promise<SendEmailResult> {
     if (!params || typeof params !== "object") throw configError("emails.send needs the email's details.")
     if (typeof params.from !== "string" || !params.from.trim()) throw configError("emails.send needs `from`.")
-    if (params.to === undefined || params.to === null || (typeof params.to !== "string" && !Array.isArray(params.to))) {
-      throw configError("emails.send needs `to`: an address or a list of addresses.")
-    }
+    if (params.to === undefined || params.to === null) throw configError("emails.send needs `to`: an address or a list of addresses.")
+    const { to, cc, replyTo, ...rest } = params as SendEmailParams & Record<string, unknown>
     return this.#http.request<SendEmailResult>(
       "POST",
       "/emails",
       {
-        from: params.from,
-        fromName: params.fromName,
-        to: list(params.to),
-        cc: params.cc === undefined ? undefined : list(params.cc),
-        replyTo: params.replyTo === undefined ? undefined : list(params.replyTo),
-        subject: params.subject,
-        html: params.html,
-        text: params.text,
-        templateId: params.templateId,
-        templateAlias: params.templateAlias,
-        data: params.data,
-        topicId: params.topicId,
+        ...rest,
+        to: list(to, "to"),
+        ...(cc === undefined ? {} : { cc: list(cc, "cc") }),
+        ...(replyTo === undefined ? {} : { replyTo: list(replyTo, "replyTo") }),
       },
       options,
     )
