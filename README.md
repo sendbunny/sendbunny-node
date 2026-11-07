@@ -3,28 +3,28 @@
 [![npm version](https://img.shields.io/npm/v/sendbunny.svg)](https://www.npmjs.com/package/sendbunny)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
+```bash
+npm install sendbunny
+```
+
 The official Node.js SDK for [SendBunny](https://sendbunny.co/?utm_source=github&utm_medium=readme&utm_campaign=sendbunny-node), the agentic AI email platform for developers. Send your app's email with HTML, text or [React Email](https://react.email), and let your AI agent (Claude Code, Cursor or Codex) run the rest.
 
-- **Free for life.** Every developer tool is free: the email API, webhooks, an inbox, contacts, templates and AI agent access (MCP). No card, no contact limit. Marketing tools are $199 once.
+- **Free for life.** Every developer tool is free: the email API, webhooks, an inbox, contacts, templates and AI agent access (MCP). No card, no contact limit.
 - **About $0.10 per 1,000 emails, paid to Amazon.** SendBunny runs in your own AWS account and sends through Amazon SES, the email service [Netflix, Reddit and Duolingo use](https://aws.amazon.com/ses/customers/). You pay us nothing.
 - **A Resend alternative.** The same `{ data, error }` results and send fields, so [switching takes two lines](#coming-from-resend). 10,000 emails a month cost about $1.20, all of it paid to Amazon, against $20 on Resend Pro (November 2026 prices). [Compare them](https://sendbunny.co/alternatives/resend?utm_source=github&utm_medium=readme&utm_campaign=sendbunny-node).
+- **Email marketing too.** You can also use SendBunny for email marketing (campaigns, automations, forms and landing pages) to turn your users into customers.
 - **No dependencies.** Works with `import` and `require`, with TypeScript types included.
 
 ## Before you start
 
-You need SendBunny running in your AWS account. All three steps are free:
+You need two things, both free:
 
 1. **An AWS account.** Amazon's own account, free to create.
 2. **Amazon SES access.** A free request to Amazon, usually answered within a day.
-3. **SendBunny Free.** Three clicks from [sendbunny.co/start-free](https://sendbunny.co/start-free?utm_source=github&utm_medium=readme&utm_campaign=sendbunny-node), and it installs in your AWS account.
 
-Need help with AWS or SES? [Ask us](https://sendbunny.co/?utm_source=github&utm_medium=readme&utm_campaign=sendbunny-node#ask).
+Then install SendBunny Free in that AWS account: three clicks from [sendbunny.co/start-free](https://sendbunny.co/start-free?utm_source=github&utm_medium=readme&utm_campaign=sendbunny-node).
 
-## Install
-
-```bash
-npm install sendbunny
-```
+Need help with AWS or SES? [Contact us](https://sendbunny.co/?utm_source=github&utm_medium=readme&utm_campaign=sendbunny-node#ask).
 
 ## Setup
 
@@ -300,7 +300,7 @@ Tested on Node.js 20, 22 and 24, with `import` or `require`. It uses only web st
 
 ## About SendBunny
 
-SendBunny is the agentic AI email platform for developers, and it runs in your own AWS account. SendBunny Free gives you the email API, webhooks, an inbox to receive and reply, contacts, templates, and an MCP server so your AI agent can run your email too, free for life. SendBunny Premium adds marketing tools (campaigns, automations, forms and landing pages) for $199 once. Either way, you pay Amazon only for what you send, about $0.10 per 1,000 emails. [Get it free at sendbunny.co](https://sendbunny.co/start-free?utm_source=github&utm_medium=readme&utm_campaign=sendbunny-node).
+SendBunny is the agentic AI email platform for developers, and it runs in your own AWS account. It gives you the email API, webhooks, an inbox to receive and reply, contacts, templates, and an MCP server so your AI agent can run your email too, free for life. You can also use it for email marketing (campaigns, automations, forms and landing pages) to turn your users into customers. You pay Amazon only for what you send, about $0.10 per 1,000 emails. [Get it free at sendbunny.co](https://sendbunny.co/start-free?utm_source=github&utm_medium=readme&utm_campaign=sendbunny-node).
 
 ## License
 
