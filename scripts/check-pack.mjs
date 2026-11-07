@@ -17,7 +17,14 @@ const SECRET_LIKE = [
 ]
 
 const npm = process.platform === "win32" ? "npm.cmd" : "npm"
-const [report] = JSON.parse(execFileSync(npm, ["pack", "--dry-run", "--json", "--ignore-scripts"], { encoding: "utf8" }))
+// npm 10 and 11 print a list holding one report; npm 12 prints an object keyed
+// by package name. The release runs npm 12, so both must work.
+const packed = JSON.parse(execFileSync(npm, ["pack", "--dry-run", "--json", "--ignore-scripts"], { encoding: "utf8" }))
+const report = Array.isArray(packed) ? packed[0] : Object.values(packed ?? {})[0]
+if (!report || !Array.isArray(report.files)) {
+  console.error("Package check failed: could not read the output of `npm pack --json`. Its format may have changed: update scripts/check-pack.mjs.")
+  process.exit(1)
+}
 const problems = []
 
 for (const { path } of report.files) {

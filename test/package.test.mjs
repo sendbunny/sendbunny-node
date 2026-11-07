@@ -1,5 +1,6 @@
 // The package works for both module systems, through its published entry points.
 import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { describe, it } from "node:test"
 
@@ -29,5 +30,15 @@ describe("entry points", () => {
     }
     assert.ok(!(new Error("x") instanceof esm.SendBunnyError))
     assert.ok(!({ code: "config" } instanceof esm.SendBunnyError))
+  })
+})
+
+describe("release setup", () => {
+  it("CI checks the package with the same npm the release uses", () => {
+    const read = (file) => readFileSync(new URL(`../.github/workflows/${file}`, import.meta.url), "utf8")
+    const pinned = (text) => [...text.matchAll(/npm@(\d+\.\d+\.\d+)/g)].map((m) => m[1])
+    const release = pinned(read("release.yml"))
+    assert.equal(release.length, 1, "release.yml installs one pinned npm")
+    assert.deepEqual(pinned(read("ci.yml")), release, "ci.yml must install the npm that release.yml uses")
   })
 })
