@@ -112,7 +112,7 @@ describe("emails.send", () => {
     const element = { type: () => null, props: { name: "Ana" }, key: null }
     await failed(sb.emails.send({ from: "a@acme.test", to: "b@example.com", subject: "x", react: element }), (e) => {
       assert.equal(e.code, "config")
-      assert.match(e.message, /npm install @react-email\/render/)
+      assert.match(e.message, /npm install react-email/)
     })
     assert.equal(calls.length, 0)
   })

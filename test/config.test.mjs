@@ -137,11 +137,11 @@ describe("package", () => {
     assert.equal(VERSION, pkg.version)
   })
 
-  it("has no runtime dependencies; React Email's renderer is an optional add-on", () => {
+  it("has no runtime dependencies; React Email is an optional add-on", () => {
     const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
     assert.deepEqual(pkg.dependencies ?? {}, {})
-    assert.deepEqual(Object.keys(pkg.peerDependencies ?? {}), ["@react-email/render"])
-    assert.deepEqual(pkg.peerDependenciesMeta, { "@react-email/render": { optional: true } })
+    assert.deepEqual(Object.keys(pkg.peerDependencies ?? {}), ["@react-email/render", "react-email"])
+    assert.deepEqual(pkg.peerDependenciesMeta, { "@react-email/render": { optional: true }, "react-email": { optional: true } })
     assert.deepEqual(pkg.optionalDependencies ?? {}, {})
     for (const hook of ["preinstall", "install", "postinstall", "prepare"]) {
       assert.equal(pkg.scripts?.[hook], undefined, `${hook} script must not exist`)

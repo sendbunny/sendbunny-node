@@ -35,7 +35,7 @@ type Body =
       /**
        * A React Email component, like `<WelcomeEmail name="Ana" />`. Turned
        * into HTML (and a text version, unless you give `text`) on your
-       * server. Needs `npm install @react-email/render`.
+       * server. Needs React Email in your app: `npm install react-email`.
        */
       react: ReactEmailElement
       text?: string

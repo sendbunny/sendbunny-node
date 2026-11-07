@@ -59,10 +59,14 @@
     "ci": "npm run typecheck && npm run build && npm test && npm run check:pack"
   },
   "peerDependencies": {
-    "@react-email/render": ">=1.1.0"
+    "@react-email/render": ">=1.1.0",
+    "react-email": ">=6.0.0"
   },
   "peerDependenciesMeta": {
     "@react-email/render": {
+      "optional": true
+    },
+    "react-email": {
       "optional": true
     }
   },

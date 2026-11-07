@@ -70,12 +70,12 @@ await sendbunny.emails.send({
 Build your email as a React component with [React Email](https://react.email), then pass it as `react`. Add React Email to your project first:
 
 ```bash
-npm install @react-email/components @react-email/render
+npm install react-email react react-dom
 ```
 
 ```tsx
 // emails/welcome.tsx
-import { Body, Button, Heading, Html, Text } from "@react-email/components"
+import { Body, Button, Heading, Html, Text } from "react-email"
 
 export function WelcomeEmail({ name }: { name: string }) {
   return (
