@@ -141,8 +141,8 @@ export class Transport {
         isJson && data && typeof data === "object" && typeof (data as { error?: unknown }).error === "string"
           ? (data as { error: string }).error
           : null
-      // A server error does not mean nothing happened: the gateway gives up
-      // after 29 seconds while the work can carry on behind it.
+      // A server error does not prove nothing happened: the work may still
+      // finish after the error was sent back.
       const uncertain = status >= 500 && method !== "GET"
       throw new SendBunnyError(serverMessage ?? statusMessage(status, uncertain), {
         code: "api",

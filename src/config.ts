@@ -3,7 +3,7 @@ import { configError } from "./errors.js"
 
 const API_PATH = "/api/v1"
 
-/** Keys are `sb` plus letters and digits (API Gateway allows 20 to 128 characters). */
+/** Keys are `sb` plus letters and digits, 20 to 128 characters in all. */
 const API_KEY_PATTERN = /^sb[A-Za-z0-9]{18,126}$/
 
 export const DEFAULT_TIMEOUT_MS = 30_000

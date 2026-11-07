@@ -96,6 +96,7 @@ describe("settings", () => {
 })
 
 describe("the key stays secret", () => {
+  // A made-up test secret: base64 for the word "secret", four times.
   const client = new SendBunny({ url: URL_, apiKey: KEY, webhookSecret: "whsec_c2VjcmV0c2VjcmV0c2VjcmV0c2VjcmV0" })
   const views = [
     inspect(client),

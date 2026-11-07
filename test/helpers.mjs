@@ -2,7 +2,7 @@
 // files that are published.
 import { createHmac, randomBytes } from "node:crypto"
 
-/** A well-formed fake key: "sb" plus 40 letters and digits. Never a real one. */
+/** A made-up key in the right shape ("sb" plus letters and digits). Never a real one. */
 export const KEY = "sbTESTkey0123456789abcdefghijABCDEFGHIJ0123"
 export const URL_ = "https://mail.acme.test/api/v1"
 
@@ -24,7 +24,7 @@ export function newSecret() {
   return `whsec_${randomBytes(32).toString("base64")}`
 }
 
-/** Signs exactly like SendBunny's webhook sender (shared/webhooks/secret.ts). */
+/** Signs the Standard Webhooks way, as a SendBunny install does. */
 export function sign(secret, id, timestamp, body) {
   const key = Buffer.from(secret.replace(/^whsec_/, ""), "base64")
   return `v1,${createHmac("sha256", key).update(`${id}.${timestamp}.${body}`).digest("base64")}`

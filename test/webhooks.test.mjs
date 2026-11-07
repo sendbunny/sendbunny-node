@@ -89,6 +89,7 @@ describe("verifyWebhook accepts genuine requests", () => {
           "webhook-timestamp": "1614265330",
           "webhook-signature": "v1,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=",
         },
+        // The public example secret from the Standard Webhooks specification, not a real one.
         { secret: "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw" },
       ).catch((e) => e)
       // The signature checks out; the body is not a SendBunny event, which is the next check.
