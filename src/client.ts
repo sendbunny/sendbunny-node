@@ -15,7 +15,10 @@ export interface SendBunnyOptions {
   url?: string
   /** An API key from your install's API keys page. Default: SENDBUNNY_API_KEY. */
   apiKey?: string
-  /** Your sending domain, like `acme.com`, used by contacts and events when a call does not name one. */
+  /**
+   * Your sending domain, like `acme.com`. Contacts, events and the email log
+   * use it when a call does not name one. Default: SENDBUNNY_DOMAIN.
+   */
   domain?: string
   /** A webhook's signing secret (`whsec_...`). Default: SENDBUNNY_WEBHOOK_SECRET. */
   webhookSecret?: string
@@ -33,8 +36,11 @@ const INSPECT = Symbol.for("nodejs.util.inspect.custom")
  *
  * ```ts
  * const sendbunny = new SendBunny() // reads SENDBUNNY_URL and SENDBUNNY_API_KEY
- * await sendbunny.emails.send({ from: "hello@acme.com", to: "ana@example.com", subject: "Hi", text: "Hello!" })
+ * const { data, error } = await sendbunny.emails.send({ from: "hello@acme.com", to: "ana@example.com", subject: "Hi", text: "Hello!" })
  * ```
+ *
+ * Calls never throw: each returns `{ data, error }`. Only this constructor
+ * (for missing or wrong settings) and `webhooks.verify` throw.
  */
 export class SendBunny {
   readonly emails: Emails
@@ -55,8 +61,8 @@ export class SendBunny {
       timeoutMs: options.timeoutMs,
       fetch: options.fetch,
     })
-    const domain = resolveDomain(options.domain)
-    this.emails = new Emails(this.#transport)
+    const domain = resolveDomain(options.domain ?? readEnv("SENDBUNNY_DOMAIN"))
+    this.emails = new Emails(this.#transport, domain)
     this.contacts = new Contacts(this.#transport, domain)
     this.events = new Events(this.#transport, domain)
     this.webhooks = new Webhooks(options.webhookSecret)

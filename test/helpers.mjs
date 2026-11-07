@@ -56,4 +56,4 @@ export async function withEnv(vars, fn) {
   }
 }
 
-export const NO_ENV = { SENDBUNNY_URL: undefined, SENDBUNNY_API_KEY: undefined, SENDBUNNY_WEBHOOK_SECRET: undefined }
+export const NO_ENV = { SENDBUNNY_URL: undefined, SENDBUNNY_API_KEY: undefined, SENDBUNNY_DOMAIN: undefined, SENDBUNNY_WEBHOOK_SECRET: undefined }

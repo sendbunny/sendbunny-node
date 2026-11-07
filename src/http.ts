@@ -1,6 +1,6 @@
 /** @internal The one place a request leaves this SDK. */
 import { DEFAULT_TIMEOUT_MS, resolveTimeout } from "./config.js"
-import { SendBunnyError, configError } from "./errors.js"
+import { SendBunnyError, configError, type SendBunnyErrorCode } from "./errors.js"
 import { VERSION } from "./version.js"
 
 /** Options every call accepts. */
@@ -31,6 +31,18 @@ function retryAfterSeconds(header: string | null): number | null {
   return Math.max(0, Math.ceil((date - Date.now()) / 1000))
 }
 
+/** The error code for an error answer. */
+function codeFor(status: number, serverCode: unknown): SendBunnyErrorCode {
+  if (serverCode === "premium_required") return "premium_required"
+  if (status === 400 || status === 413 || status === 422) return "validation_error"
+  if (status === 401) return "unauthorized"
+  if (status === 403) return "forbidden"
+  if (status === 404) return "not_found"
+  if (status === 429) return "rate_limited"
+  if (status >= 500) return "server_error"
+  return "api_error"
+}
+
 /** Words for an error answer that carries no message of its own. */
 function statusMessage(status: number, uncertain: boolean): string {
   if (status >= 500) {
@@ -42,6 +54,16 @@ function statusMessage(status: number, uncertain: boolean): string {
   if (status === 404) return "Not found (status 404). Check that SENDBUNNY_URL is your SendBunny install's address."
   if (status === 429) return "Too many requests (status 429). Wait and try again."
   return `SendBunny answered with status ${status}.`
+}
+
+/** @internal `path?a=1&b=2`, leaving out values that are not set. */
+export function withQuery(path: string, query: Record<string, string | number | undefined>): string {
+  const params = new URLSearchParams()
+  for (const [name, value] of Object.entries(query)) {
+    if (value !== undefined && value !== "") params.set(name, String(value))
+  }
+  const text = params.toString()
+  return text ? `${path}?${text}` : path
 }
 
 function requestIdOf(headers: Headers): string | null {
@@ -137,15 +159,13 @@ export class Transport {
     }
 
     if (status < 200 || status >= 300) {
-      const serverMessage =
-        isJson && data && typeof data === "object" && typeof (data as { error?: unknown }).error === "string"
-          ? (data as { error: string }).error
-          : null
+      const answer = isJson && data && typeof data === "object" ? (data as { error?: unknown; code?: unknown }) : null
+      const serverMessage = typeof answer?.error === "string" ? answer.error : null
       // A server error does not prove nothing happened: the work may still
       // finish after the error was sent back.
       const uncertain = status >= 500 && method !== "GET"
       throw new SendBunnyError(serverMessage ?? statusMessage(status, uncertain), {
-        code: "api",
+        code: codeFor(status, answer?.code),
         uncertain,
         status,
         retryAfter: retryAfterSeconds(response.headers.get("retry-after")),

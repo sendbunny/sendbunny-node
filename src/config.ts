@@ -1,5 +1,5 @@
 /** @internal Checks the settings before anything is sent. */
-import { configError } from "./errors.js"
+import { configError, validationError } from "./errors.js"
 
 const API_PATH = "/api/v1"
 
@@ -84,13 +84,15 @@ export function resolveTimeout(raw: number | undefined, fallback = DEFAULT_TIMEO
   return Math.ceil(raw)
 }
 
-/** A sending domain such as `acme.com`, lowercased. */
-export function resolveDomain(raw: unknown): string | undefined {
+/**
+ * A sending domain such as `acme.com`, lowercased. A wrong value in the
+ * client's options is a `config` error; in a call, a `validation_error`.
+ */
+export function resolveDomain(raw: unknown, inCall = false): string | undefined {
   if (raw === undefined || raw === null) return undefined
-  if (typeof raw !== "string") throw configError("domain must be your sending domain, like acme.com.")
+  const fail = () => (inCall ? validationError : configError)("domain must be your sending domain, like acme.com.")
+  if (typeof raw !== "string") throw fail()
   const value = raw.trim().toLowerCase()
-  if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/.test(value)) {
-    throw configError("domain must be your sending domain, like acme.com.")
-  }
+  if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/.test(value)) throw fail()
   return value
 }
