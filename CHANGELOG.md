@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 (2026-11-07)
+
+No change to how the SDK works: the same calls, the same results, the same type definitions.
+
+- The npm page now says what SendBunny is, what it costs, and the two things you need before you start (an AWS account and Amazon SES access, both free).
+- Built with TypeScript 7.
+
 ## 0.1.1 (2026-11-07)
 
 First release. (0.1.0 was tagged but never published: its release stopped at the final package check.)

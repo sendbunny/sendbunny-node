@@ -1,6 +1,6 @@
 {
   "name": "sendbunny",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Official Node.js SDK for SendBunny, the agentic AI email platform for developers: a free email API with React Email support, in your own AWS account on Amazon SES, about $0.10 per 1,000 emails. A Resend alternative.",
   "license": "MIT",
   "author": "SendBunny (https://sendbunny.co)",
