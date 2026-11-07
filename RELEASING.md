@@ -4,31 +4,16 @@ How a version gets from this repository to npm. Nobody holds an npm token. GitHu
 
 ## One-time setup
 
-### npm (a maintainer, on their own computer)
+### npm
 
-1. Sign up at [npmjs.com/signup](https://www.npmjs.com/signup) with a work email address. Pick your own name as the username: npm usernames and organisation names share one list, so a user called `sendbunny` would block the organisation name.
-2. Turn on two-step login with a **security key or passkey** (Account, Two-Factor Authentication). Save the recovery codes offline.
-3. Create the organisation `sendbunny` on the free plan: [npmjs.com/org/create](https://www.npmjs.com/org/create).
-4. Claim the package name. npm only lets the automatic release publish a package that already exists, so the very first version is a placeholder published by hand:
+Done on 7 November 2026:
 
-   ```bash
-   mkdir sendbunny-placeholder && cd sendbunny-placeholder
-   cat > package.json <<'EOF'
-   {
-     "name": "sendbunny",
-     "version": "0.0.1",
-     "description": "The official SendBunny SDK. First release soon: https://github.com/sendbunny/sendbunny-node",
-     "license": "MIT",
-     "repository": { "type": "git", "url": "git+https://github.com/sendbunny/sendbunny-node.git" }
-   }
-   EOF
-   printf '# sendbunny\n\nThe official SendBunny SDK. First release soon: https://github.com/sendbunny/sendbunny-node\n' > README.md
-   npm login      # opens the browser; approve with your passkey
-   npm publish    # asks for two-step login again
-   npm logout     # deletes the token this computer was given
-   ```
+1. The npm account `sendbunny` owns the package, with two-step login by passkey.
+2. The name was claimed with a placeholder version, 0.0.2. npm held this first version of the new package for approval under **Staged Packages** on npmjs.com before it went live.
 
-5. Right before the first real release (the setting expires if no release uses it within 48 hours), open the `sendbunny` package on npmjs.com, then **Settings**:
+Releases never come from anyone's computer: GitHub Actions stages them (below). If a manual publish is ever unavoidable, keep the npm login file out of the package folder, and run `npm pack --dry-run` right before `npm publish` to see every file that would go out.
+
+3. Right before the first real release (the setting expires if no release uses it within 48 hours), open the `sendbunny` package on npmjs.com, then **Settings**:
    - **Trusted publishing**, GitHub Actions: organisation `sendbunny`, repository `sendbunny-node`, workflow `release.yml`, environment `npm`. Allowed actions: **stage publish only**. Do not allow direct publishing.
    - **Publishing access**: "Require two-factor authentication and disallow tokens".
 

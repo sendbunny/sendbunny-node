@@ -1,7 +1,7 @@
 {
   "name": "sendbunny",
   "version": "0.1.0",
-  "description": "Official SendBunny SDK for Node.js and edge runtimes: send email, add contacts, track events and verify webhooks from your own SendBunny install.",
+  "description": "The official SendBunny SDK for Node.js: send email (HTML, text or React Email), manage contacts, track events and verify webhooks, from your own SendBunny install.",
   "license": "MIT",
   "author": "SendBunny (https://sendbunny.co)",
   "homepage": "https://github.com/sendbunny/sendbunny-node#readme",
@@ -15,13 +15,15 @@
   "keywords": [
     "sendbunny",
     "email",
-    "transactional-email",
     "email-api",
+    "transactional-email",
+    "react-email",
     "aws-ses",
     "ses",
     "webhooks",
     "standard-webhooks",
-    "typescript"
+    "typescript",
+    "sdk"
   ],
   "type": "module",
   "sideEffects": false,
@@ -55,6 +57,18 @@
     "test": "node --test test/*.test.mjs",
     "check:pack": "node scripts/check-pack.mjs",
     "ci": "npm run typecheck && npm run build && npm test && npm run check:pack"
+  },
+  "peerDependencies": {
+    "@react-email/render": ">=1.1.0",
+    "react-email": ">=6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@react-email/render": {
+      "optional": true
+    },
+    "react-email": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "typescript": "5.9.3"

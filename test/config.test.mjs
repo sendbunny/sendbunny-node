@@ -74,6 +74,19 @@ describe("settings", () => {
     configFailure(() => new SendBunny({ url: URL_, apiKey: "https://mail.acme.test" }), /web address/)
   })
 
+  it("reads SENDBUNNY_DOMAIN for calls that need a domain", async () => {
+    await withEnv({ ...NO_ENV, SENDBUNNY_DOMAIN: "Acme.Test" }, async () => {
+      const calls = []
+      const sb = new SendBunny({ url: URL_, apiKey: KEY, fetch: async (input) => (calls.push(input), new Response('{"emails":[],"cursor":null}', { status: 200 })) })
+      const { error } = await sb.emails.list()
+      assert.equal(error, null)
+      assert.equal(calls[0], `${URL_}/emails?root=acme.test`)
+    })
+    await withEnv({ ...NO_ENV, SENDBUNNY_DOMAIN: "not a domain" }, () => {
+      configFailure(() => new SendBunny({ url: URL_, apiKey: KEY }), /domain/)
+    })
+  })
+
   it("checks timeoutMs and domain", () => {
     configFailure(() => new SendBunny({ url: URL_, apiKey: KEY, timeoutMs: 0 }), /timeoutMs/)
     configFailure(() => new SendBunny({ url: URL_, apiKey: KEY, timeoutMs: Number.NaN }), /timeoutMs/)
@@ -124,10 +137,11 @@ describe("package", () => {
     assert.equal(VERSION, pkg.version)
   })
 
-  it("has no runtime dependencies", () => {
+  it("has no runtime dependencies; React Email is an optional add-on", () => {
     const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
     assert.deepEqual(pkg.dependencies ?? {}, {})
-    assert.deepEqual(pkg.peerDependencies ?? {}, {})
+    assert.deepEqual(Object.keys(pkg.peerDependencies ?? {}), ["@react-email/render", "react-email"])
+    assert.deepEqual(pkg.peerDependenciesMeta, { "@react-email/render": { optional: true }, "react-email": { optional: true } })
     assert.deepEqual(pkg.optionalDependencies ?? {}, {})
     for (const hook of ["preinstall", "install", "postinstall", "prepare"]) {
       assert.equal(pkg.scripts?.[hook], undefined, `${hook} script must not exist`)
