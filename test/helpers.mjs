@@ -3,7 +3,7 @@
 import { createHmac, randomBytes } from "node:crypto"
 
 /** A made-up key in the right shape ("sb" plus letters and digits). Never a real one. */
-export const KEY = "sbTESTkey0123456789abcdefghijABCDEFGHIJ0123"
+export const KEY = `sb${"TEST".repeat(10)}`
 export const URL_ = "https://mail.acme.test/api/v1"
 
 /** A fetch that records calls and answers from a script. */

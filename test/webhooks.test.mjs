@@ -90,7 +90,7 @@ describe("verifyWebhook accepts genuine requests", () => {
           "webhook-signature": "v1,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=",
         },
         // The public example secret from the Standard Webhooks specification, not a real one.
-        { secret: "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw" },
+        { secret: "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw" }, // gitleaks:allow
       ).catch((e) => e)
       // The signature checks out; the body is not a SendBunny event, which is the next check.
       assert.equal(out.code, "webhook_payload")
