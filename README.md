@@ -11,9 +11,20 @@ The official Node.js SDK for [SendBunny](https://sendbunny.co/?utm_source=github
 
 - **Free for life.** Every developer tool is free: the email API, webhooks, an inbox, contacts, templates and AI agent access (MCP). No card, no contact limit.
 - **About $0.10 per 1,000 emails, paid to Amazon.** SendBunny runs in your own AWS account and sends through Amazon SES, the email service [Netflix, Reddit and Duolingo use](https://aws.amazon.com/ses/customers/). You pay us nothing.
-- **A Resend alternative.** The same `{ data, error }` results and send fields, so [switching takes two lines](#coming-from-resend). 10,000 emails a month cost about $1.20, all of it paid to Amazon, against $20 on Resend Pro (November 2026 prices). [Compare them](https://sendbunny.co/alternatives/resend?utm_source=github&utm_medium=readme&utm_campaign=sendbunny-node).
+- **A Resend alternative.** The same `{ data, error }` results and send fields, so [switching takes two lines](#coming-from-resend). [Compare them](https://sendbunny.co/alternatives/resend?utm_source=github&utm_medium=readme&utm_campaign=sendbunny-node).
 - **Email marketing too.** You can also use SendBunny for email marketing (campaigns, automations, forms and landing pages) to turn your users into customers.
 - **No dependencies.** Works with `import` and `require`, with TypeScript types included.
+
+## What 10,000 emails a month cost
+
+| | Per month |
+|---|---|
+| **SendBunny** | **About $1.20**, all paid to Amazon. SendBunny itself is free. |
+| Postmark (Basic) | $15 |
+| SendGrid (Essentials) | From $19.95 |
+| Resend (Pro) | $20 |
+
+No servers to maintain: SendBunny is serverless and runs in your own AWS account. The $1.20 is Amazon SES at $0.10 per 1,000 emails plus about $0.20 of AWS computing (our measurement). Other prices are from each company's pricing page on 7 November 2026.
 
 ## Before you start
 
