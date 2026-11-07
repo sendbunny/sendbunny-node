@@ -1,0 +1,5 @@
+# Reviewed 2026-11-07: test values in an earlier commit, not secrets.
+# A made-up API key used by the tests (since replaced by an obviously fake one).
+3926dce590c3451708fccf515abbc658901e3237:test/helpers.mjs:generic-api-key:6
+# The public example secret from the Standard Webhooks specification.
+3926dce590c3451708fccf515abbc658901e3237:test/webhooks.test.mjs:generic-api-key:92
