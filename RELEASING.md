@@ -39,5 +39,7 @@ Releases never come from anyone's computer: GitHub Actions stages them (below). 
    ```
 
 3. The Release workflow checks that the tag matches `package.json`, runs every check, and **stages** the version on npm. Nothing is public yet.
+
+   If this fails, nothing reaches npm, and the tag stays: release tags can never be moved or deleted. Fix the problem in a pull request and release the next patch version.
 4. On npmjs.com, open **Staged Packages**, check the version and its files, and click **Approve** (two-step login).
 5. Check the result: `npm view sendbunny version` shows the new version, its npm page shows where it was built, and `npm audit signatures` passes in a project that installs it.

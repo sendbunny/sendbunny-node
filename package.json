@@ -1,6 +1,6 @@
 {
   "name": "sendbunny",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The official SendBunny SDK for Node.js: send email (HTML, text or React Email), manage contacts, track events and verify webhooks, from your own SendBunny install.",
   "license": "MIT",
   "author": "SendBunny (https://sendbunny.co)",

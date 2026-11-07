@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.1.0 (2026-11-07)
+## 0.1.1 (2026-11-07)
 
-First release.
+First release. (0.1.0 was tagged but never published: its release stopped at the final package check.)
 
 - Every call returns `{ data, error }` and never throws, like the Resend SDK, so code written for Resend moves over by changing two lines.
 - `emails.send`: send HTML, text, a React Email component (`react`), or a SendBunny template.
